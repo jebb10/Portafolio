@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ataraxia | Terminal Access</title>
+    <style>
+        /* CSS: Estética Terminal CRT */
+        :root {
+            --term-green: #33ff33;
+            --term-dark-green: #003300;
+            --bg-black: #0a0a0a;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: var(--term-green);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Efecto de Líneas de Escaneo CRT */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* Contenedor Principal */
+        .terminal-container {
+            max-width: 700px;
+            padding: 40px;
+            border: 1px solid var(--term-green);
+            box-shadow: 0 0 15px var(--term-dark-green);
+            background: rgba(0, 20, 0, 0.9);
+            position: relative;
+            z-index: 5;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--term-green);
+            display: inline-block;
+        }
+
+        .description {
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .credentials-box {
+            margin-top: 30px;
+            border: 1px dashed var(--term-green);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .credentials-box p {
+            margin: 0 0 15px 0;
+            font-weight: bold;
+        }
+
+        /* Botón Estilo Terminal */
+        .btn-access {
+            display: inline-block;
+            background: transparent;
+            color: var(--term-green);
+            border: 2px solid var(--term-green);
+            padding: 15px 30px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-access:hover {
+            background: var(--term-green);
+            color: var(--bg-black);
+            box-shadow: 0 0 20px var(--term-green);
+        }
+
+        /* Animación de Cursor Parpadeante */
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2rem;
+            background: var(--term-green);
+            animation: blink 0.8s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Glitch sutil al cargar */
+        @keyframes scan {
+            from { top: -100%; }
+            to { top: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="terminal-container">
+    <div id="typewriter">
+        <h1>ATARAXIA<span class="cursor"></span></h1>
+        
+        <div class="description">
+            <p>> ACCEDIENDO A ARCHIVOS DE FILOSOFÍA...</p>
+            <p>La <strong>Ataraxia</strong> es el estado de serenidad absoluta y tranquilidad espiritual que los estoicos buscaban alcanzar mediante el dominio de las pasiones y la aceptación de la razón universal. En la escuela estoica, no es simplemente la ausencia de problemas, sino la fortaleza imperturbable del ser ante cualquier caos externo.</p>
+        </div>
+
+        <div class="credentials-box">
+            <p>SISTEMA RESTRINGIDO - DATOS DE PRUEBA:</p>
+            <p>USUARIO: prueba@correo.com | CLAVE: 123*</p>
+            <br>
+            <a href="https://script.google.com/macros/s/AKfycbzvmqosTXvyQK4Cq5nSjMJrviOSThg2A60k4W-4b41HhDaYzTOrOk_pBFP8ql5ltsA/exec" 
+               target="_blank" 
+               class="btn-access">
+               [ SISTEMA DE INVENTARIO ]
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Efecto simple de aparición suave para simular carga de terminal
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.querySelector('.terminal-container');
+        container.style.opacity = '0';
+        let opacity = 0;
+        const interval = setInterval(() => {
+            if (opacity >= 1) clearInterval(interval);
+            container.style.opacity = opacity;
+            opacity += 0.05;
+        }, 30);
+    });
+</script>
+
+</body>
+</html>
