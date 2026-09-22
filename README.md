@@ -2,6 +2,13 @@
 
 > *"Filosofía como modo de apreciación e Ingeniería como modo de interacción."*
 
+[![Production Vercel](https://img.shields.io/badge/Vercel-Live%20Production-black?style=flat&logo=vercel)](https://portafolio-seven-indol-36.vercel.app)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-jebb10%2FPortafolio-181717?style=flat&logo=github)](https://github.com/jebb10/Portafolio)
+[![EU AI Act Art. 14](https://img.shields.io/badge/Governance-EU%20AI%20Act%20Art.%2014-purple?style=flat)](https://portafolio-seven-indol-36.vercel.app)
+
+- **URL de Producción Oficial:** [https://portafolio-seven-indol-36.vercel.app](https://portafolio-seven-indol-36.vercel.app)
+- **Repositorio Oficial:** [https://github.com/jebb10/Portafolio](https://github.com/jebb10/Portafolio)
+
 Plataforma interactiva de producción que materializa el ecosistema de conocimiento, arquitectura de software y gobernanza de agentes de **Johan Esteban Benítez Bermúdez**. Desarrollado fusionando la ergonomía de consola de [Herdr](https://herdr.dev/) con el modelo de pensamiento en grafo de [Obsidian](https://obsidian.md/).
 
 ---
