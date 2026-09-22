@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Johan Benítez &bull; Runtime de Conocimiento & Gobernanza Agéntica</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --obs-bg: #09090b;
+      --obs-panel: #101014;
+      --obs-surface: #16161c;
+      --obs-border: #22222a;
+      --obs-border-hover: #363644;
+      --obs-accent: #7c3aed;
+      --obs-accent-light: #a88bfa;
+      --obs-accent-subtle: rgba(168, 139, 250, 0.12);
+      --obs-cyan: #38bdf8;
+      --obs-emerald: #34d399;
+      --obs-amber: #fbbf24;
+      --obs-rose: #f43f5e;
+      --obs-text: #f4f4f6;
+      --obs-muted: #9295a3;
+      --obs-dimmed: #616472;
+    }
+
+    /* Typographic Hierarchy (Impeccable Strict Scale: > 1.25x ratio) */
+    body {
+      background-color: var(--obs-bg);
+      color: var(--obs-text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 0.9375rem; /* 15px */
+      line-height: 1.6;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1 {
+      font-size: 2rem; /* 32px: 2.13x body */
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+    }
+
+    h2 {
+      font-size: 1.5rem; /* 24px: 1.6x body */
+      font-weight: 600;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      font-size: 1.15rem; /* 18.4px: 1.23x body */
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    h4 {
+      font-size: 0.95rem; /* 15.2px */
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    /* Browser Surfaces Styling */
+    ::selection {
+      background: rgba(168, 139, 250, 0.35);
+      color: #ffffff;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--obs-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--obs-border);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--obs-border-hover);
+    }
+
+    *:focus-visible {
+      outline: 2px solid var(--obs-accent-light);
+      outline-offset: 2px;
+    }
+
+    .obs-mono {
+      font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-feature-settings: "tnum" 1;
+    }
+
+    /* Standalone Container with Inset Padding */
+    .obs-panel {
+      background-color: var(--obs-panel);
+      border: 1px solid var(--obs-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+
+    .obs-callout {
+      background: rgba(168, 139, 250, 0.08);
+      border: 1px solid rgba(168, 139, 250, 0.22);
+      border-radius: 0.625rem;
+      padding: 1.25rem;
+    }
+
+    .obs-tag {
+      background: rgba(168, 139, 250, 0.12);
+      border: 1px solid rgba(168, 139, 250, 0.3);
+      color: var(--obs-accent-light);
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+
+    /* Herdr-Inspired Status Dots with Subtle Glow */
+    .dot-live {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+    }
+    .dot-live::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0.4;
+      animation: pulse-ring 2.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.6); opacity: 0; }
+      100% { transform: scale(0.95); opacity: 0; }
+    }
+
+    /* Herdr Multiplexer Tab System */
+    .mux-tab {
+      padding: 0.5rem 1rem;
+      font-size: 0.8125rem;
+      border-bottom: 2px solid transparent;
+      color: var(--obs-muted);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .mux-tab:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .mux-tab-active {
+      color: var(--obs-accent-light);
+      border-bottom-color: var(--obs-accent-light);
+      background: rgba(168, 139, 250, 0.06);
+    }
+
+    /* Terminal Command Line Pill */
+    .terminal-cmd {
+      background: #0d0d12;
+      border: 1px solid var(--obs-border);
+      border-radius: 0.5rem;
+      padding: 0.4rem 0.8rem;
+    }
+
+    /* Sidebar Items */
+    .sidebar-item {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .sidebar-item:hover {
+      background: var(--obs-surface);
+      border-color: var(--obs-border);
+    }
+    .sidebar-item-active {
+      background: rgba(168, 139, 250, 0.1);
+      border-color: rgba(168, 139, 250, 0.3);
+    }
+
+    canvas {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="p-3 md:p-6 min-h-screen flex flex-col gap-5 max-w-[1600px] mx-auto">
+
+  <!-- TOP MULTIPLEXER BAR (HERDR RUNTIME + OBSIDIAN VAULT HEAD) -->
+  <header class="obs-panel flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 py-4 px-6">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-purple-950/60 border border-purple-500/40 flex items-center justify-center text-purple-300">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-white text-xl md:text-2xl font-bold tracking-tight">Johan Benítez</h1>
+          <span class="obs-tag text-[11px] obs-mono">v2.1 Runtime</span>
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-[11px] obs-mono">
+            <span class="dot-live bg-emerald-400"></span> live
+          </span>
+        </div>
+        <p class="text-xs obs-mono text-zinc-400 mt-0.5">
+          <span class="text-purple-400">johan@ataraxia:</span><span class="text-zinc-500">~/fuente-de-conocimiento/001.4$</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Live Telemetry & GitHub Integrations (Herdr-Style Status Strip) -->
+    <div class="flex flex-wrap items-center gap-2.5 text-xs obs-mono">
+      <div class="terminal-cmd flex items-center gap-2 text-zinc-300">
+        <span class="text-purple-400 font-bold">$</span>
+        <code id="cli-cmd" class="text-zinc-200">npx ataraxia-system --inspect</code>
+        <button onclick="copyCommand()" id="copy-btn" class="ml-1 px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition text-[10px]">
+          copy
+        </button>
+      </div>
+
+      <a href="https://github.com/jebb10" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-[#14141a] border border-[#24242e] text-zinc-300 hover:border-purple-400 hover:text-white transition flex items-center gap-2">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        <span>jebb10</span>
+      </a>
+
+      <span class="px-3 py-1.5 rounded-lg bg-[#14141a] border border-[#24242e] text-purple-300 flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        <span>Obsidian Vault</span>
+      </span>
+
+      <span class="px-3 py-1.5 rounded-lg bg-purple-950/40 border border-purple-500/40 text-purple-200">
+        Oracle Agentic Certified
+      </span>
+    </div>
+  </header>
+
+  <!-- MAIN TRI-PANE RUNTIME GRID (HERDR SPACES + CANVAS + OBSIDIAN DRAWER) -->
+  <main class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+    <!-- COLUMNA 1: SIDEBAR HERDR WORKSPACES & AGENTS (3 COLUMNAS) -->
+    <aside class="lg:col-span-3 obs-panel flex flex-col gap-6">
+      
+      <!-- SPACES (BÓVEDA OBSIDIAN 001 - PROYECTOS) -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between text-xs obs-mono text-zinc-400 uppercase tracking-wider px-1">
+          <h2 class="font-semibold text-zinc-400">vault spaces</h2>
+          <span class="text-zinc-600">4 active</span>
+        </div>
+        <div class="space-y-1 text-xs obs-mono">
+          
+          <div onclick="selectNodeByName('Johan Benítez')" class="sidebar-item sidebar-item-active flex items-center justify-between" id="space-001-4">
+            <div class="flex items-center gap-2.5">
+              <span class="dot-live bg-purple-400"></span>
+              <div>
+                <strong class="text-white block font-semibold">001.4 Portafolio</strong>
+                <span class="text-zinc-500 text-[11px]">runtime · main</span>
+              </div>
+            </div>
+            <span class="text-[10px] text-purple-400">v2.1</span>
+          </div>
+
+          <div onclick="selectNodeByName('LLM Wiki Framework')" class="sidebar-item flex items-center justify-between" id="space-001-3">
+            <div class="flex items-center gap-2.5">
+              <span class="dot-live bg-sky-400"></span>
+              <div>
+                <strong class="text-zinc-300 block font-semibold">001.3 LLM Wiki</strong>
+                <span class="text-zinc-500 text-[11px]">knowledge-sync</span>
+              </div>
+            </div>
+            <span class="text-[10px] text-zinc-500">live</span>
+          </div>
+
+          <div onclick="selectNodeByName('Ataraxia System')" class="sidebar-item flex items-center justify-between" id="space-001-1">
+            <div class="flex items-center gap-2.5">
+              <span class="dot-live bg-emerald-400"></span>
+              <div>
+                <strong class="text-zinc-300 block font-semibold">001.1 Ataraxia System</strong>
+                <span class="text-zinc-500 text-[11px]">macro-system</span>
+              </div>
+            </div>
+            <span class="text-[10px] text-zinc-500">core</span>
+          </div>
+
+          <div onclick="selectNodeByName('JyK Libros')" class="sidebar-item flex items-center justify-between" id="space-001-2">
+            <div class="flex items-center gap-2.5">
+              <span class="dot-live bg-amber-400"></span>
+              <div>
+                <strong class="text-zinc-300 block font-semibold">001.2 JyK Libros</strong>
+                <span class="text-zinc-500 text-[11px]">domain-catalog</span>
+              </div>
+            </div>
+            <span class="text-[10px] text-zinc-500">relational</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AGENTS & CAPABILITIES (HERDR-STYLE RUNTIME STATUS) -->
+      <div class="space-y-3 pt-4 border-t border-[#22222a]">
+        <div class="flex items-center justify-between text-xs obs-mono text-zinc-400 uppercase tracking-wider px-1">
+          <h2 class="font-semibold text-zinc-400">agents & stacks</h2>
+          <span class="text-zinc-600">oracle certified</span>
+        </div>
+        <div class="space-y-1 text-xs obs-mono">
+          
+          <div onclick="selectNodeByName('AgentADK')" class="sidebar-item flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-sky-400 font-bold">&bull;</span>
+              <div>
+                <strong class="text-zinc-200 block">AgentADK</strong>
+                <span class="text-zinc-500 text-[11px]">oracle-ai &bull; mcp</span>
+              </div>
+            </div>
+            <span class="text-emerald-400 text-[10px]">&lt;2% err</span>
+          </div>
+
+          <div onclick="selectNodeByName('Tablero Orchestrator')" class="sidebar-item flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-sky-400 font-bold">&bull;</span>
+              <div>
+                <strong class="text-zinc-200 block">Tablero</strong>
+                <span class="text-zinc-500 text-[11px]">nextjs &bull; realtime</span>
+              </div>
+            </div>
+            <span class="text-emerald-400 text-[10px]">&lt;100ms</span>
+          </div>
+
+          <div onclick="selectNodeByName('Inventario Apps Script')" class="sidebar-item flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-sky-400 font-bold">&bull;</span>
+              <div>
+                <strong class="text-zinc-200 block">GAS Data Hub</strong>
+                <span class="text-zinc-500 text-[11px]">serverless &bull; pg</span>
+              </div>
+            </div>
+            <span class="text-purple-300 text-[10px]">$0 usd</span>
+          </div>
+
+          <div onclick="selectNodeByName('ISO 29148 / BABOK')" class="sidebar-item flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-amber-400 font-bold">&bull;</span>
+              <div>
+                <strong class="text-zinc-200 block">Gobernanza</strong>
+                <span class="text-zinc-500 text-[11px]">iso 29148 &bull; babok</span>
+              </div>
+            </div>
+            <span class="text-amber-300 text-[10px]">formal</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PRINCIPO RECTOR OBSIDIAN/FILOSOFÍA -->
+      <blockquote class="obs-callout space-y-1">
+        <p class="text-[11px] obs-mono text-purple-300 font-semibold uppercase tracking-wider">Axioma Central</p>
+        <p class="text-xs italic text-zinc-200 font-serif leading-relaxed">
+          "Filosofía como modo de apreciación e Ingeniería como modo de interacción."
+        </p>
+      </blockquote>
+
+    </aside>
+
+    <!-- COLUMNA 2: ÁREA CENTRAL MULTIPLEXER + KNOWLEDGE GRAPH (6 COLUMNAS) -->
+    <section class="lg:col-span-6 flex flex-col gap-5">
+      <h2 class="sr-only">Knowledge Runtime & Ontological Graph</h2>
+      
+      <!-- HERDR MULTIPLEXER TABS STRIP -->
+      <div class="obs-panel p-0 overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between border-b border-[#22222a] bg-[#0c0c10] px-3">
+          <div class="flex items-center">
+            <button onclick="switchMuxTab('graph')" id="tab-graph" class="mux-tab mux-tab-active flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="2"/><circle cx="20" cy="6" r="2"/><circle cx="4" cy="18" r="2"/><circle cx="20" cy="18" r="2"/>
+                <path d="M6 7l4 3m4 0l4-3m-4 5l4 3m-8-3l-4 3"/>
+              </svg>
+              <span>knowledge-graph.canvas</span>
+            </button>
+            <button onclick="switchMuxTab('cases')" id="tab-cases" class="mux-tab flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              </svg>
+              <span>case-studies.triada</span>
+            </button>
+            <button onclick="switchMuxTab('gov')" id="tab-gov" class="mux-tab flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span>agentic-stack.hitl</span>
+            </button>
+            <button onclick="switchMuxTab('srs')" id="tab-srs" class="mux-tab flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <span>iso29148.srs</span>
+            </button>
+          </div>
+          <span class="text-[11px] obs-mono text-zinc-500 hidden sm:inline">60 fps &bull; D3</span>
+        </div>
+
+        <!-- TAB 1: KNOWLEDGE GRAPH VIEW -->
+        <div id="view-graph" class="p-5 space-y-4">
+          
+          <!-- Graph Controls & Category Filter Pills -->
+          <div class="flex flex-wrap items-center justify-between gap-3 text-xs obs-mono">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button onclick="filterGraph('all')" class="px-2.5 py-1 rounded bg-purple-950/40 border border-purple-500/40 text-purple-200">all</button>
+              <button onclick="filterGraph('github')" class="px-2.5 py-1 rounded bg-[#14141a] border border-[#24242e] text-zinc-400 hover:text-white">github</button>
+              <button onclick="filterGraph('core')" class="px-2.5 py-1 rounded bg-[#14141a] border border-[#24242e] text-zinc-400 hover:text-white">core</button>
+              <button onclick="filterGraph('template')" class="px-2.5 py-1 rounded bg-[#14141a] border border-[#24242e] text-zinc-400 hover:text-white">standards</button>
+              <button onclick="filterGraph('philosophy')" class="px-2.5 py-1 rounded bg-[#14141a] border border-[#24242e] text-zinc-400 hover:text-white">philosophy</button>
+            </div>
+            <button onclick="resetGraph()" class="px-2.5 py-1 rounded bg-[#14141a] hover:bg-[#202028] border border-[#24242e] text-zinc-300 transition flex items-center gap-1.5">
+              <svg class="w-3 h-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span>reset</span>
+            </button>
+          </div>
+
+          <!-- Canvas Container -->
+          <div class="relative w-full h-[380px] rounded-lg border border-[#22222a] bg-[#070709] overflow-hidden">
+            <canvas id="graphCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+
+            <!-- Floating Tooltip -->
+            <div id="graphTooltip" class="absolute hidden pointer-events-none z-20 px-3 py-2 rounded-lg bg-[#121218] border border-purple-500/50 text-xs shadow-2xl transition-opacity">
+              <p id="tooltipTitle" class="font-semibold text-white"></p>
+              <p id="tooltipType" class="text-[11px] text-purple-300 obs-mono mt-0.5"></p>
+            </div>
+          </div>
+
+          <!-- Canvas Status & Node Legend -->
+          <div class="flex flex-wrap items-center justify-between text-xs obs-mono text-zinc-400 pt-1">
+            <div class="flex items-center gap-3">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-purple-400"></span> core</span>
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span> github</span>
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> standards</span>
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> philosophy</span>
+            </div>
+            <span id="canvasFocusLabel" class="text-purple-300">foco: Johan Benítez</span>
+          </div>
+
+        </div>
+
+        <!-- TAB 2: CASE STUDIES LIST -->
+        <div id="view-cases" class="hidden p-5 space-y-4">
+          <div class="space-y-3">
+            
+            <article onclick="selectNodeByName('LLM Wiki Framework')" class="p-4 rounded-lg border border-[#22222a] bg-[#121218] hover:border-purple-500/40 cursor-pointer transition space-y-2">
+              <div class="flex items-center justify-between">
+                <h3 class="text-white font-semibold">LLM Wiki Framework</h3>
+                <span class="obs-tag text-xs obs-mono">Persistent AI</span>
+              </div>
+              <p class="text-xs text-zinc-300 leading-relaxed">
+                Persistencia duradera inter-sesión con Markdown, sincronización con Obsidian y Playwright MCP.
+              </p>
+              <div class="flex items-center justify-between text-xs obs-mono pt-2 border-t border-[#1e1e26]">
+                <span class="text-emerald-400">70% menos tokens</span>
+                <span class="text-purple-300">100% retención</span>
+              </div>
+            </article>
+
+            <article onclick="selectNodeByName('AgentADK')" class="p-4 rounded-lg border border-[#22222a] bg-[#121218] hover:border-purple-500/40 cursor-pointer transition space-y-2">
+              <div class="flex items-center justify-between">
+                <h3 class="text-white font-semibold">AgentADK (Agentic AI Dev Kit)</h3>
+                <span class="obs-tag text-xs obs-mono">Oracle AI / MCP</span>
+              </div>
+              <p class="text-xs text-zinc-300 leading-relaxed">
+                Kit desacoplado multi-proveedor basado en Model Context Protocol (MCP) y bucles deterministas ReAct.
+              </p>
+              <div class="flex items-center justify-between text-xs obs-mono pt-2 border-t border-[#1e1e26]">
+                <span class="text-emerald-400">60% menos tiempo setup</span>
+                <span class="text-purple-300">&lt;2% error en APIs</span>
+              </div>
+            </article>
+
+            <article onclick="selectNodeByName('Tablero Orchestrator')" class="p-4 rounded-lg border border-[#22222a] bg-[#121218] hover:border-purple-500/40 cursor-pointer transition space-y-2">
+              <div class="flex items-center justify-between">
+                <h3 class="text-white font-semibold">Tablero &bull; Visual State Orchestrator</h3>
+                <span class="obs-tag text-xs obs-mono">Next.js Realtime</span>
+              </div>
+              <p class="text-xs text-zinc-300 leading-relaxed">
+                Observabilidad en tiempo real de llamadas y mutaciones de estado de agentes autónomos mediante WebSockets y SSE.
+              </p>
+              <div class="flex items-center justify-between text-xs obs-mono pt-2 border-t border-[#1e1e26]">
+                <span class="text-emerald-400">Latencia sub-100ms</span>
+                <span class="text-purple-300">50% menos debug</span>
+              </div>
+            </article>
+
+            <article onclick="selectNodeByName('Inventario Apps Script')" class="p-4 rounded-lg border border-[#22222a] bg-[#121218] hover:border-purple-500/40 cursor-pointer transition space-y-2">
+              <div class="flex items-center justify-between">
+                <h3 class="text-white font-semibold">Inventario Apps Script & Data Hub</h3>
+                <span class="obs-tag text-xs obs-mono">Serverless Hub</span>
+              </div>
+              <p class="text-xs text-zinc-300 leading-relaxed">
+                Middleware serverless desacoplado en Google Apps Script enlazado a PostgreSQL (Supabase) con costo $0 de servidor.
+              </p>
+              <div class="flex items-center justify-between text-xs obs-mono pt-2 border-t border-[#1e1e26]">
+                <span class="text-emerald-400">85% menos tiempo</span>
+                <span class="text-purple-300">$0 USD costo fijo</span>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- TAB 3: AGENTIC STACK & HITL SIMULATOR -->
+        <div id="view-gov" class="hidden p-5 space-y-5">
+          <div class="space-y-3">
+            <h3 class="text-white font-semibold text-sm">Agentic Requirements Stack (6 Capas)</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs obs-mono">
+              <div class="p-2.5 bg-[#14141a] rounded border border-[#22222a] text-zinc-300">L1 Goal Spec</div>
+              <div class="p-2.5 bg-[#14141a] rounded border border-[#22222a] text-zinc-300">L2 Autonomy</div>
+              <div class="p-2.5 bg-[#14141a] rounded border border-[#22222a] text-zinc-300">L3 Tool Contract</div>
+              <div class="p-2.5 bg-[#14141a] rounded border border-[#22222a] text-zinc-300">L4 HITL Handoff</div>
+              <div class="p-2.5 bg-[#14141a] rounded border border-[#22222a] text-zinc-300">L5 Memory Rights</div>
+              <div class="p-2.5 bg-[#14141a] rounded border border-[#22222a] text-zinc-300">L6 Audit Ledger</div>
+            </div>
+          </div>
+
+          <!-- Interactive HITL Decision Simulator -->
+          <div class="space-y-3 pt-4 border-t border-[#22222a]">
+            <h3 class="text-white font-semibold text-sm">Simulador de Matriz HITL (EU AI Act Art. 14)</h3>
+            <p class="text-xs text-zinc-400">Selecciona una acción agéntica para verificar el comportamiento de la barrera de seguridad:</p>
+            
+            <div class="grid grid-cols-3 gap-2 text-xs obs-mono">
+              <button onclick="testHitl('read')" class="p-2 rounded bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-left">
+                1. Lectura local
+              </button>
+              <button onclick="testHitl('schema')" class="p-2 rounded bg-amber-950/40 border border-amber-500/40 text-amber-300 text-left">
+                2. Alterar DB
+              </button>
+              <button onclick="testHitl('deploy')" class="p-2 rounded bg-rose-950/40 border border-rose-500/40 text-rose-300 text-left">
+                3. Prod sin tests
+              </button>
+            </div>
+
+            <div id="hitlResultBox" class="p-3.5 rounded-lg bg-[#0d0d12] border border-purple-500/40 text-xs obs-mono space-y-1">
+              <span id="hitlBadge" class="text-emerald-400 font-bold block">MAY ACT &bull; Totalmente Autónomo</span>
+              <p id="hitlDescription" class="text-zinc-300">El agente ejecuta la lectura de forma autónoma. No requiere aprobación humana.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: SRS ISO 29148 SPECIFICATION -->
+        <div id="view-srs" class="hidden p-5 space-y-4">
+          <div class="space-y-2">
+            <h3 class="text-white font-semibold text-sm">SRS_Portafolio_Johan_Benitez_ISO29148.md</h3>
+            <p class="text-xs text-zinc-300 leading-relaxed">
+              Especificación formal con 15 requerimientos funcionales en sintaxis EARS, 10 NFRs bajo FURPS+ y matriz de trazabilidad (RTM).
+            </p>
+          </div>
+          <div class="pt-3 border-t border-[#22222a] flex flex-wrap gap-2 text-xs obs-mono">
+            <a href="https://github.com/jebb10" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded bg-purple-600 hover:bg-purple-500 text-white transition">
+              Descargar SRS Markdown
+            </a>
+            <button onclick="selectNodeByName('ISO 29148 / BABOK')" class="px-3 py-1.5 rounded bg-[#181822] border border-[#2a2a38] text-purple-300 hover:text-white transition">
+              Inspeccionar en Grafo
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- COLUMNA 3: OBSIDIAN SPLIT VIEW DRAWER (3 COLUMNAS) -->
+    <aside class="lg:col-span-3 obs-panel flex flex-col justify-between gap-5 bg-[#111116] border-purple-500/30">
+      
+      <div class="space-y-4">
+        
+        <!-- Drawer Header -->
+        <div class="flex items-center justify-between pb-3 border-b border-[#22222a]">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <h2 class="text-xs obs-mono uppercase tracking-wider text-zinc-200 font-semibold">Obsidian Inspector</h2>
+          </div>
+          <span id="drawerBadge" class="obs-tag text-[10px] obs-mono">Proyecto Activo</span>
+        </div>
+
+        <!-- Node Identification -->
+        <div class="space-y-1">
+          <h3 id="drawerTitle" class="text-white text-base font-bold">LLM Wiki Framework</h3>
+          <p id="drawerSubtitle" class="text-xs text-zinc-400 leading-snug">Sistema de conocimiento persistente para agentes autónomos</p>
+        </div>
+
+        <!-- Tríada de Johan: Problema, Arquitectura e Impacto -->
+        <div class="space-y-3 pt-2 text-xs">
+          
+          <div class="space-y-1">
+            <span class="obs-mono text-zinc-400 uppercase font-semibold block text-[10px]">1. Problema Abordado</span>
+            <p id="drawerProblem" class="text-zinc-300 leading-relaxed">
+              Amnesia contextual en agentes conversacionales y sobrecostos por relectura repetitiva de documentos.
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <span class="obs-mono text-zinc-400 uppercase font-semibold block text-[10px]">2. Decisión & Arquitectura</span>
+            <p id="drawerArch" class="text-zinc-300 leading-relaxed">
+              Estructuración de memoria basada en Markdown (`index.md`, `log.md`), sincronización con Obsidian y Playwright MCP.
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <span class="obs-mono text-zinc-400 uppercase font-semibold block text-[10px]">3. Impacto & Métricas</span>
+            <p id="drawerImpact" class="text-emerald-300 obs-mono leading-relaxed">
+              70% reducción en tokens de entrada; 100% persistencia inter-sesión.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Wikilinks Ontológicos Relacionados -->
+        <div class="pt-3 border-t border-[#22222a] space-y-1.5">
+          <span class="text-[10px] obs-mono text-zinc-500 uppercase tracking-wider block">Enlaces Ontológicos [[Wikilinks]]</span>
+          <div class="flex flex-wrap gap-1.5 text-[11px] obs-mono" id="drawerWikilinks">
+            <button onclick="selectNodeByName('Agentic AI')" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-purple-300 transition">[[Agentic AI]]</button>
+            <button onclick="selectNodeByName('Filosofía Analítica')" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-purple-300 transition">[[Filosofía]]</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Actions Bottom Bar -->
+      <div class="pt-3 border-t border-[#22222a]">
+        <a id="drawerLink" href="https://github.com/jebb10" target="_blank" rel="noopener noreferrer" class="w-full py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs obs-mono transition flex items-center justify-center gap-2">
+          <span>Ver Repositorio GitHub</span>
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </a>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- INTERACTION ENGINE & GRAPH PHYSICS SIMULATOR -->
+  <script>
+    // COPY COMMAND FUNCTIONALITY
+    function copyCommand() {
+      const cmdText = document.getElementById('cli-cmd').textContent;
+      navigator.clipboard.writeText(cmdText).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'copied!';
+        btn.classList.add('text-emerald-400');
+        setTimeout(() => {
+          btn.textContent = 'copy';
+          btn.classList.remove('text-emerald-400');
+        }, 1800);
+      });
+    }
+
+    // MULTIPLEXER TAB SWITCHING
+    function switchMuxTab(tabKey) {
+      const tabs = ['graph', 'cases', 'gov', 'srs'];
+      tabs.forEach(key => {
+        const btn = document.getElementById(`tab-${key}`);
+        const view = document.getElementById(`view-${key}`);
+        if (key === tabKey) {
+          btn.className = 'mux-tab mux-tab-active flex items-center gap-2';
+          view.classList.remove('hidden');
+        } else {
+          btn.className = 'mux-tab flex items-center gap-2';
+          view.classList.add('hidden');
+        }
+      });
+    }
+
+    // HITL DECISION SIMULATOR
+    function testHitl(scenario) {
+      const badge = document.getElementById('hitlBadge');
+      const desc = document.getElementById('hitlDescription');
+      if (scenario === 'read') {
+        badge.className = 'text-emerald-400 font-bold block';
+        badge.textContent = 'MAY ACT • Totalmente Autónomo';
+        desc.textContent = 'El agente ejecuta la lectura local de notas con confianza >95%. Cero riesgo de mutación.';
+      } else if (scenario === 'schema') {
+        badge.className = 'text-amber-400 font-bold block';
+        badge.textContent = 'MUST ASK • Requiere Confirmación Humana';
+        desc.textContent = 'Alterar tablas de PostgreSQL o esquema de datos requiere aprobación explícita antes de ejecutar la migración.';
+      } else if (scenario === 'deploy') {
+        badge.className = 'text-rose-400 font-bold block';
+        badge.textContent = 'MUST NEVER • Prohibido Estrictamente';
+        desc.textContent = 'Publicar a producción sin pasar la suite de pruebas unitarias y linters está bloqueado por guardarraíles.';
+      }
+    }
+
+    // NODE DATABASE REGISTRY
+    const registry = {
+      'Johan Benítez': {
+        type: 'Perfil Core',
+        badge: 'Arquitecto / PO',
+        subtitle: 'Lic. en Filosofía (UNAD) + Ing. de Sistemas (UniMinuto) + Oracle Agentic AI',
+        problem: 'La IA actual opera con no-determinismo sin contención formal en producción.',
+        arch: 'Integración de epistemología analítica y estándares de software ISO 29148 y BABOK v3.',
+        impact: 'Transformación de modelos estocásticos en agentes deterministas, seguros y auditables.',
+        link: 'https://github.com/jebb10',
+        wikis: ['Agentic AI', 'Filosofía Analítica', 'Ing. de Sistemas']
+      },
+      'LLM Wiki Framework': {
+        type: 'Proyectos GitHub',
+        badge: 'Repositorio Activo',
+        subtitle: 'Sistema de conocimiento continuo y duradero para agentes autónomos',
+        problem: 'Amnesia contextual en agentes conversacionales y sobrecostos por relectura repetitiva de documentos.',
+        arch: 'Estructuración de memoria basada en Markdown (`index.md`, `log.md`), sincronización con Obsidian y Playwright MCP.',
+        impact: '70% de reducción en consumo de tokens de entrada; 100% persistencia inter-sesión.',
+        link: 'https://github.com/jebb10',
+        wikis: ['Agentic AI', 'Ataraxia System']
+      },
+      'AgentADK': {
+        type: 'Proyectos GitHub',
+        badge: 'Oracle AI / MCP',
+        subtitle: 'Kit modular alineado con Oracle Agentic AI y el Model Context Protocol',
+        problem: 'Inestabilidad en la invocación de herramientas externas y falta de estandarización en orquestación.',
+        arch: 'Arquitectura desacoplada basada en MCP, OCI Enterprise AI, bucles ReAct y tipado estricto.',
+        impact: '60% de reducción en tiempo de integración de APIs externas; tasa de fallo < 2%.',
+        link: 'https://github.com/jebb10/AgentADK',
+        wikis: ['Agentic AI', 'Tablero Orchestrator']
+      },
+      'Tablero Orchestrator': {
+        type: 'Proyectos GitHub',
+        badge: 'Realtime / Next.js',
+        subtitle: 'Panel Kanban reactivo para observabilidad de estados agénticos en tiempo real',
+        problem: 'Opacidad de caja negra durante la ejecución asíncrona de agentes autónomos.',
+        arch: 'Frontend reactivo en Next.js conectado con Supabase mediante WebSockets y Server-Sent Events (SSE).',
+        impact: 'Sincronización de estado con latencia sub-100ms; 50% de reducción en tiempo de diagnóstico.',
+        link: 'https://github.com/jebb10/Tablero',
+        wikis: ['AgentADK', 'Ataraxia System']
+      },
+      'Inventario Apps Script': {
+        type: 'Proyectos GitHub',
+        badge: 'Serverless Data Hub',
+        subtitle: 'Middleware serverless con persistencia relacional en Supabase',
+        problem: 'Conciliación manual de stock en PyMEs con alto margen de error y presupuesto $0.',
+        arch: 'Middleware desacoplado en Google Apps Script exponiendo API REST hacia Google Sheets y PostgreSQL.',
+        impact: '85% menos tiempo de digitación; $0 USD en costos fijos de servidor.',
+        link: 'https://github.com/jebb10/ataraxia-system',
+        wikis: ['Ing. de Sistemas', 'Ataraxia System']
+      },
+      'Ataraxia System': {
+        type: 'Proyectos GitHub',
+        badge: 'Macro-Sistema',
+        subtitle: 'Ecosistema de gobernanza, inventario y contención determinista',
+        problem: 'Falta de interoperabilidad entre módulos de inventario, interfaces web y agentes.',
+        arch: 'Arquitectura limpia distribuida bajo TypeScript, Supabase PostgreSQL y Vercel Edge.',
+        impact: '100% de trazabilidad entre especificación funcional y despliegue productivo.',
+        link: 'https://github.com/jebb10/ataraxia-system',
+        wikis: ['Inventario Apps Script', 'Tablero Orchestrator']
+      },
+      'JyK Libros': {
+        type: 'Proyectos GitHub',
+        badge: 'Modelo de Dominio',
+        subtitle: 'Catálogo de persistencia relacional y modelado formal de software',
+        problem: 'Gestión desorganizada de inventario editorial y ausencia de trazabilidad de catálogo.',
+        arch: 'Modelado formal DDD (Domain-Driven Design), esquemas PostgreSQL y micro-endpoints tipados.',
+        impact: 'Cero inconsistencias en catalogación y consultas optimizadas sub-50ms.',
+        link: 'https://github.com/jebb10',
+        wikis: ['Ing. de Sistemas', 'ISO 29148 / BABOK']
+      },
+      'ISO 29148 / BABOK': {
+        type: 'Plantillas Normativas',
+        badge: 'Gobernanza Formal',
+        subtitle: 'Contención lógica y no-determinismo bajo estándares internacionales',
+        problem: 'Desarrollo de software guiado por corazonadas o prompts empíricos sin verificación formal.',
+        arch: 'Adopción de sintaxis EARS para requerimientos no ambiguos y criterios de aceptación Gherkin tabulados.',
+        impact: 'Cero alucinaciones por ambigüedad semántica en la especificación del sistema.',
+        link: 'https://github.com/jebb10',
+        wikis: ['Filosofía Analítica', 'Ing. de Sistemas']
+      },
+      'Filosofía Analítica': {
+        type: 'Filosofía & Estándares',
+        badge: 'Fundamento Epistémico',
+        subtitle: 'La ontología de la información y la delimitación de espacios de estados',
+        problem: 'Falta de criterio conceptual profundo para discernir la verdad de la plausibilidad probabilística.',
+        arch: 'Análisis lógico-formal derivado de la formación en la Licenciatura en Filosofía (UNAD).',
+        impact: 'Aporte de rigor conceptual, ética algorítmica y diseño deliberado de invariantes.',
+        link: 'https://github.com/jebb10',
+        wikis: ['Johan Benítez', 'ISO 29148 / BABOK']
+      },
+      'Ing. de Sistemas': {
+        type: 'Filosofía & Estándares',
+        badge: 'Disciplina Técnica',
+        subtitle: 'Arquitectura limpia, patrones durables y modelado formal',
+        problem: 'Sistemas frágiles, acoplados y sin capacidad de escala o auditoría.',
+        arch: 'Clean Architecture, Domain-Driven Design (DDD) y persistencia relacional con PostgreSQL.',
+        impact: 'Construcción de software de alta resiliencia y mantenibilidad a largo plazo.',
+        link: 'https://github.com/jebb10',
+        wikis: ['Johan Benítez', 'Ataraxia System']
+      },
+      'Agentic AI': {
+        type: 'Perfil Core',
+        badge: 'Especialidad',
+        subtitle: 'Arquitecturas supervisor-worker, evaluator-optimizer y memoria de 3 niveles',
+        problem: 'Agentes autónomos en bucles infinitos o ejecutando herramientas sin fronteras de seguridad.',
+        arch: 'Certificación Oracle Agentic AI combinada con el protocolo abierto Model Context Protocol (MCP).',
+        impact: 'Despliegue de flujos multi-agente deterministas y auditables bajo la directiva del EU AI Act.',
+        link: 'https://github.com/jebb10',
+        wikis: ['AgentADK', 'LLM Wiki Framework']
+      }
+    };
+
+    // KNOWLEDGE GRAPH ENGINE (CANVAS D3-STYLE FORCES)
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const tooltip = document.getElementById('graphTooltip');
+    const tooltipTitle = document.getElementById('tooltipTitle');
+    const tooltipType = document.getElementById('tooltipType');
+    const focusLabel = document.getElementById('canvasFocusLabel');
+
+    let width = canvas.width = canvas.parentElement.clientWidth;
+    let height = canvas.height = canvas.parentElement.clientHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = canvas.parentElement.clientWidth;
+      height = canvas.height = canvas.parentElement.clientHeight;
+    });
+
+    const nodes = [
+      { id: 'Johan Benítez', category: 'core', x: width / 2, y: height / 2, r: 20, color: '#a88bfa' },
+      { id: 'Filosofía Analítica', category: 'philosophy', x: width / 2 - 130, y: height / 2 - 75, r: 12, color: '#fbbf24' },
+      { id: 'Ing. de Sistemas', category: 'philosophy', x: width / 2 + 130, y: height / 2 - 75, r: 12, color: '#fbbf24' },
+      { id: 'Agentic AI', category: 'core', x: width / 2, y: height / 2 - 110, r: 14, color: '#a88bfa' },
+      { id: 'ISO 29148 / BABOK', category: 'template', x: width / 2 - 150, y: height / 2 + 35, r: 12, color: '#34d399' },
+      { id: 'LLM Wiki Framework', category: 'github', x: width / 2 - 80, y: height / 2 + 95, r: 12, color: '#38bdf8' },
+      { id: 'Inventario Apps Script', category: 'github', x: width / 2 + 80, y: height / 2 + 95, r: 12, color: '#38bdf8' },
+      { id: 'AgentADK', category: 'github', x: width / 2 + 150, y: height / 2 + 35, r: 12, color: '#38bdf8' },
+      { id: 'Tablero Orchestrator', category: 'github', x: width / 2 + 160, y: height / 2 - 20, r: 12, color: '#38bdf8' },
+      { id: 'Ataraxia System', category: 'github', x: width / 2 - 160, y: height / 2 - 20, r: 13, color: '#38bdf8' },
+      { id: 'JyK Libros', category: 'github', x: width / 2 + 10, y: height / 2 + 130, r: 11, color: '#38bdf8' },
+    ];
+
+    const links = [
+      { source: 0, target: 1 },
+      { source: 0, target: 2 },
+      { source: 0, target: 3 },
+      { source: 1, target: 4 },
+      { source: 2, target: 4 },
+      { source: 3, target: 5 },
+      { source: 3, target: 7 },
+      { source: 3, target: 8 },
+      { source: 2, target: 6 },
+      { source: 4, target: 9 },
+      { source: 0, target: 9 },
+      { source: 2, target: 10 },
+      { source: 9, target: 6 },
+    ];
+
+    let activeFilter = 'all';
+    let draggedNode = null;
+    let hoveredNode = null;
+    let selectedNode = nodes[0];
+
+    function selectNode(node) {
+      selectedNode = node;
+      focusLabel.textContent = `foco: ${node.id}`;
+      const data = registry[node.id];
+      if (data) {
+        document.getElementById('drawerBadge').textContent = data.badge;
+        document.getElementById('drawerTitle').textContent = node.id;
+        document.getElementById('drawerSubtitle').textContent = data.subtitle;
+        document.getElementById('drawerProblem').textContent = data.problem;
+        document.getElementById('drawerArch').textContent = data.arch;
+        document.getElementById('drawerImpact').textContent = data.impact;
+        document.getElementById('drawerLink').href = data.link;
+
+        const wikisContainer = document.getElementById('drawerWikilinks');
+        wikisContainer.innerHTML = '';
+        data.wikis.forEach(w => {
+          const btn = document.createElement('button');
+          btn.className = 'px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-purple-300 transition';
+          btn.textContent = `[[${w}]]`;
+          btn.onclick = () => selectNodeByName(w);
+          wikisContainer.appendChild(btn);
+        });
+      }
+    }
+
+    function selectNodeByName(name) {
+      const target = nodes.find(n => n.id === name);
+      if (target) {
+        selectNode(target);
+        switchMuxTab('graph');
+      }
+    }
+
+    function filterGraph(category) {
+      activeFilter = category;
+    }
+
+    function getMousePos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const pos = getMousePos(e);
+      nodes.forEach(node => {
+        const dx = pos.x - node.x;
+        const dy = pos.y - node.y;
+        if (Math.sqrt(dx * dx + dy * dy) <= node.r + 4) {
+          draggedNode = node;
+          selectNode(node);
+        }
+      });
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      const pos = getMousePos(e);
+      if (draggedNode) {
+        draggedNode.x = pos.x;
+        draggedNode.y = pos.y;
+      }
+
+      let found = null;
+      nodes.forEach(node => {
+        const dx = pos.x - node.x;
+        const dy = pos.y - node.y;
+        if (Math.sqrt(dx * dx + dy * dy) <= node.r + 4) {
+          found = node;
+        }
+      });
+
+      hoveredNode = found;
+      if (found) {
+        canvas.style.cursor = 'pointer';
+        tooltipTitle.textContent = found.id;
+        tooltipType.textContent = (registry[found.id] && registry[found.id].type) || 'Concepto';
+        tooltip.style.left = `${Math.min(pos.x + 12, width - 160)}px`;
+        tooltip.style.top = `${Math.min(pos.y + 12, height - 60)}px`;
+        tooltip.classList.remove('hidden');
+      } else {
+        canvas.style.cursor = draggedNode ? 'grabbing' : 'grab';
+        tooltip.classList.add('hidden');
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      draggedNode = null;
+    });
+
+    function resetGraph() {
+      nodes[0].x = width / 2; nodes[0].y = height / 2;
+      nodes[1].x = width / 2 - 130; nodes[1].y = height / 2 - 75;
+      nodes[2].x = width / 2 + 130; nodes[2].y = height / 2 - 75;
+      nodes[3].x = width / 2; nodes[3].y = height / 2 - 110;
+      nodes[4].x = width / 2 - 150; nodes[4].y = height / 2 + 35;
+      nodes[5].x = width / 2 - 80; nodes[5].y = height / 2 + 95;
+      nodes[6].x = width / 2 + 80; nodes[6].y = height / 2 + 95;
+      nodes[7].x = width / 2 + 150; nodes[7].y = height / 2 + 35;
+      nodes[8].x = width / 2 + 160; nodes[8].y = height / 2 - 20;
+      nodes[9].x = width / 2 - 160; nodes[9].y = height / 2 - 20;
+      nodes[10].x = width / 2 + 10; nodes[10].y = height / 2 + 130;
+      selectNode(nodes[0]);
+    }
+
+    function renderGraph() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Links Rendering
+      links.forEach(link => {
+        const s = nodes[link.source];
+        const t = nodes[link.target];
+        const isHighlight = (selectedNode && (selectedNode === s || selectedNode === t)) ||
+                            (hoveredNode && (hoveredNode === s || hoveredNode === t));
+
+        const isFilteredOut = (activeFilter !== 'all') && (s.category !== activeFilter && t.category !== activeFilter);
+
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(t.x, t.y);
+        ctx.strokeStyle = isFilteredOut ? 'rgba(34, 34, 42, 0.15)' : (isHighlight ? 'rgba(168, 139, 250, 0.65)' : 'rgba(45, 45, 56, 0.45)');
+        ctx.lineWidth = isHighlight ? 2 : 1;
+        ctx.stroke();
+      });
+
+      // Nodes Rendering
+      nodes.forEach(node => {
+        const isSelected = (selectedNode === node);
+        const isHovered = (hoveredNode === node);
+        const isFilteredOut = (activeFilter !== 'all') && (node.category !== activeFilter);
+
+        ctx.save();
+        if (isFilteredOut) {
+          ctx.globalAlpha = 0.25;
+        }
+
+        // Selection / Hover Ring
+        if (isSelected || isHovered) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.r + 5, 0, Math.PI * 2);
+          ctx.strokeStyle = isSelected ? 'rgba(168, 139, 250, 0.85)' : 'rgba(255, 255, 255, 0.35)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+
+        // Main Node Body
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+        ctx.fillStyle = node.color;
+        ctx.fill();
+
+        // Inner Core
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r * 0.45, 0, Math.PI * 2);
+        ctx.fillStyle = '#09090b';
+        ctx.fill();
+
+        // Typography Label
+        ctx.font = isSelected ? '600 12px system-ui, -apple-system, sans-serif' : '400 11px system-ui, -apple-system, sans-serif';
+        ctx.fillStyle = isSelected ? '#ffffff' : (isHovered ? '#f4f4f6' : '#9ca3af');
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(node.id, node.x, node.y + node.r + 6);
+
+        ctx.restore();
+      });
+
+      requestAnimationFrame(renderGraph);
+    }
+
+    // INITIALIZATION
+    selectNode(nodes[0]);
+    renderGraph();
+  </script>
+</body>
+</html>
