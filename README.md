@@ -49,6 +49,10 @@ El proyecto está diseñado bajo una arquitectura modular de 3 paneles multiplex
 ## 3. Comandos de Desarrollo
 
 ```bash
+# Clonar repositorio oficial
+git clone https://github.com/jebb10/Portafolio.git
+cd portafolio
+
 # Instalar dependencias
 npm install
 

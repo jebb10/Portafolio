@@ -10,7 +10,7 @@ interface HeaderMultiplexerProps {
 
 export function HeaderMultiplexer({ activeTab, onTabChange }: HeaderMultiplexerProps) {
   const [copied, setCopied] = useState(false);
-  const command = "git clone https://github.com/jebb10/portafolio.git";
+  const command = "git clone https://github.com/jebb10/Portafolio.git";
 
   const handleCopy = async () => {
     try {
@@ -48,13 +48,13 @@ export function HeaderMultiplexer({ activeTab, onTabChange }: HeaderMultiplexerP
             Obsidian Vault: <span className="text-basalt-200">001.4 Portafolio</span>
           </span>
           <a
-            href="https://github.com/jebb10"
+            href="https://github.com/jebb10/Portafolio"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-basalt-300 hover:text-white transition-colors"
           >
             <GitBranch className="w-3 h-3 text-obsidian-accent" />
-            <span>jebb10/portafolio</span>
+            <span>jebb10/Portafolio</span>
             <ExternalLink className="w-2.5 h-2.5" />
           </a>
         </div>
